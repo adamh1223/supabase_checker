@@ -1,0 +1,1 @@
+echo "test log entry" >> /Users/adamhussain/Desktop/supabase_checker/ping.log
