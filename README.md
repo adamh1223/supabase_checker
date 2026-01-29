@@ -12,6 +12,8 @@ The script is tailored for the "Adam Underwater" project and will pick up values
 - `SUPABASE_ENDPOINT_PATH` (defaults to `/health`)
 - `SUPABASE_TARGET_URL` (full URL override; takes precedence over `SUPABASE_ENDPOINT_PATH`)
 
+You can also add additional projects by suffixing environment variables with `_2` or `_3` (for example, `SUPABASE_URL_3`, `SUPABASE_KEY_3`). These get pinged on the same schedule as the primary project.
+
 ## Setup
 1. Ensure `curl` is installed on the machine running the cron job.
 2. Create a `.env` file beside the script with your connection values (these mirror the user's local setup):
@@ -35,6 +37,8 @@ Run the script manually (it auto-loads `.env` when present):
 By default the script calls `${SUPABASE_URL}/health`. You can override the endpoint with either of the following environment variables:
 - `SUPABASE_ENDPOINT_PATH`: path appended to `${SUPABASE_URL}` (defaults to `/health`).
 - `SUPABASE_TARGET_URL`: full URL to ping; when set it overrides everything else.
+
+For additional projects, you can use per-project overrides like `SUPABASE_ENDPOINT_PATH_3` or `SUPABASE_TARGET_URL_3` if needed.
 
 The script exits with a non-zero status on failure, which makes it suitable for cron or other schedulers.
 
