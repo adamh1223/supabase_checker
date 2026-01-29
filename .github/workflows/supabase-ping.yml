@@ -9,18 +9,19 @@ jobs:
   ping:
     runs-on: ubuntu-latest
     steps:
-      - name: Ping Supabase projects
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Write .env from GitHub secret
+        shell: bash
         run: |
-          curl -sS -o /dev/null -w "bucket1 %{http_code}\n" \
-            -H "apikey: $SUPABASE_KEY" \
-            -H "Authorization: Bearer $SUPABASE_KEY" \
-            "https://fpoxvfuxgtlyphowqdgf.supabase.co/health"
+          printf "%s" "${SUPABASE_ENV}" > .env
 
-          curl -sS -o /dev/null -w "bucket3 %{http_code}\n" \
-            -H "apikey: $SUPABASE_KEY_3" \
-            -H "Authorization: Bearer $SUPABASE_KEY_3" \
-            "https://uctqtajkpjsifdxtmjwo.supabase.co/health"
+      - name: Run ping script
+        shell: bash
+        run: |
+          chmod +x ./ping_supabase.sh
+          ./ping_supabase.sh
         env:
-          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
-          SUPABASE_KEY_3: ${{ secrets.SUPABASE_KEY_3 }}
-
+          LOG_FILE: ./ping.log
+          SUPABASE_ENV: ${{ secrets.SUPABASE_ENV }}
