@@ -1,0 +1,26 @@
+name: Supabase Keepalive
+
+on:
+  schedule:
+    - cron: "0 9 */3 * *"
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping Supabase projects
+        run: |
+          curl -sS -o /dev/null -w "bucket1 %{http_code}\n" \
+            -H "apikey: $SUPABASE_KEY" \
+            -H "Authorization: Bearer $SUPABASE_KEY" \
+            "https://fpoxvfuxgtlyphowqdgf.supabase.co/health"
+
+          curl -sS -o /dev/null -w "bucket3 %{http_code}\n" \
+            -H "apikey: $SUPABASE_KEY_3" \
+            -H "Authorization: Bearer $SUPABASE_KEY_3" \
+            "https://uctqtajkpjsifdxtmjwo.supabase.co/health"
+        env:
+          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+          SUPABASE_KEY_3: ${{ secrets.SUPABASE_KEY_3 }}
+

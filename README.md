@@ -66,3 +66,5 @@ You only need to set this up one time. Cron will then run the ping automatically
    ```
 
 > Note: cron's `*/3` day-of-month interval restarts each month. If you need an exact every-3-days cadence across months, consider a systemd timer or a small wrapper script that sleeps for 3 days in a loop.
+
+Manual ping command: ./ping_supabase.sh

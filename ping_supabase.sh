@@ -14,6 +14,8 @@
 
 set -euo pipefail
 
+LOG_FILE="/Users/adamhussain/Desktop/supabase_checker/ping.log"
+
 if [[ -f .env ]]; then
   set -a
   # shellcheck disable=SC1091
@@ -72,14 +74,14 @@ ping_project() {
   fi
 
   if curl -o /dev/null -w "%{http_code}" "${header_args[@]}" "${target_url}" | grep -qE "^(200|204)"; then
-    echo "[$(timestamp)] Supabase ping succeeded: ${target_url}" \
-      "${key_value:+(auth header set)}"
+    echo "[$(timestamp)] SUCCESS ${target_url} ${key_value:+(auth header set)}" \
+  | tee -a "$LOG_FILE"
     return 0
   fi
 
   local status=$?
-  echo "[$(timestamp)] Supabase ping failed: ${target_url}" \
-    "${key_value:+(auth header set)}" >&2
+  echo "[$(timestamp)] FAILURE ${target_url} ${key_value:+(auth header set)}" \
+  | tee -a "$LOG_FILE" >&2
   return "${status}"
 }
 
