@@ -17,22 +17,18 @@ jobs:
         env:
           SUPABASE_ENV: ${{ secrets.SUPABASE_ENV }}
         run: |
-          # Fail fast if the secret is missing/empty
-          if [ -z "${SUPABASE_ENV}" ]; then
+          set -e
+
+          if [ -z "$SUPABASE_ENV" ]; then
             echo "SUPABASE_ENV secret is empty or not set"
             exit 1
           fi
 
-          # Write the multi-line secret into a .env file (preserves newlines)
-          cat > .env << 'EOF'
-${SUPABASE_ENV}
-EOF
+          # Write secret to .env (preserves newlines safely)
+          printf "%s\n" "$SUPABASE_ENV" > .env
 
-          # Show which variables are present (names only; values redacted)
-          echo "Variables detected in .env:"
-          grep -E '^(SUPABASE_URL|SUPABASE_KEY|SUPABASE_TARGET_URL|SUPABASE_ENDPOINT_PATH|SUPABASE_ANON_KEY)_' .env \
-            | sed 's/=.*$/=*** (redacted)/' || true
-          grep -E '^(SUPABASE_URL|SUPABASE_KEY|SUPABASE_TARGET_URL|SUPABASE_ENDPOINT_PATH|SUPABASE_ANON_KEY)=' .env \
+          echo "Variables detected in .env (names only):"
+          grep -E '^(SUPABASE_URL|SUPABASE_KEY|SUPABASE_TARGET_URL|SUPABASE_ENDPOINT_PATH|SUPABASE_ANON_KEY)' .env \
             | sed 's/=.*$/=*** (redacted)/' || true
 
       - name: Run ping script
