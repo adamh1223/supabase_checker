@@ -35,15 +35,6 @@ resolve_var() {
   printf '%s' "${!var_name:-}"
 }
 
-build_header_args() {
-  local key_value="$1"
-  local -a headers=("-s")
-  if [[ -n "${key_value}" ]]; then
-    headers+=("-H" "apikey: ${key_value}" "-H" "Authorization: Bearer ${key_value}")
-  fi
-  printf '%s\n' "${headers[@]}"
-}
-
 ping_project() {
   local suffix="$1"
   local url_var="SUPABASE_URL${suffix}"
@@ -75,7 +66,10 @@ ping_project() {
     key_value="$(resolve_var "${anon_var}")"
   fi
 
-  mapfile -t header_args < <(build_header_args "${key_value}")
+  local -a header_args=("-s")
+  if [[ -n "${key_value}" ]]; then
+    header_args+=("-H" "apikey: ${key_value}" "-H" "Authorization: Bearer ${key_value}")
+  fi
 
   if curl -o /dev/null -w "%{http_code}" "${header_args[@]}" "${target_url}" | grep -qE "^(200|204)"; then
     echo "[$(timestamp)] Supabase ping succeeded: ${target_url}" \
@@ -98,7 +92,7 @@ for suffix in _2 _3; do
     continue
   fi
   status=$?
-  if [[ ${status} -eq 2 ]]; then
+ if [[ ${status} -eq 2 ]]; then
     continue
   fi
   failures=$((failures + 1))
