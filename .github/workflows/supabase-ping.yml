@@ -1,20 +1,42 @@
-- name: Write .env from GitHub secret
-  shell: bash
-  run: |
-    # Fail fast if the secret is missing/empty
-    if [ -z "${SUPABASE_ENV}" ]; then
-      echo "SUPABASE_ENV secret is empty or not set"
-      exit 1
-    fi
+name: Supabase Keepalive
 
-    # Write it to .env (preserves newlines)
-    cat > .env << 'EOF'
+on:
+  schedule:
+    - cron: "0 9 */3 * *"
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Write .env from GitHub secret
+        shell: bash
+        env:
+          SUPABASE_ENV: ${{ secrets.SUPABASE_ENV }}
+        run: |
+          # Fail fast if the secret is missing/empty
+          if [ -z "${SUPABASE_ENV}" ]; then
+            echo "SUPABASE_ENV secret is empty or not set"
+            exit 1
+          fi
+
+          # Write the multi-line secret into a .env file (preserves newlines)
+          cat > .env << 'EOF'
 ${SUPABASE_ENV}
 EOF
 
-    # Show which variables are present (names only; no secrets)
-    echo "Variables detected in .env:"
-    grep -E '^(SUPABASE_URL|SUPABASE_KEY|SUPABASE_TARGET_URL|SUPABASE_ENDPOINT_PATH|SUPABASE_ANON_KEY)_' .env | sed 's/=.*$/=*** (redacted)/' || true
-    grep -E '^(SUPABASE_URL|SUPABASE_KEY|SUPABASE_TARGET_URL|SUPABASE_ENDPOINT_PATH|SUPABASE_ANON_KEY)=' .env | sed 's/=.*$/=*** (redacted)/' || true
-  env:
-    SUPABASE_ENV: ${{ secrets.SUPABASE_ENV }}
+          # Show which variables are present (names only; values redacted)
+          echo "Variables detected in .env:"
+          grep -E '^(SUPABASE_URL|SUPABASE_KEY|SUPABASE_TARGET_URL|SUPABASE_ENDPOINT_PATH|SUPABASE_ANON_KEY)_' .env \
+            | sed 's/=.*$/=*** (redacted)/' || true
+          grep -E '^(SUPABASE_URL|SUPABASE_KEY|SUPABASE_TARGET_URL|SUPABASE_ENDPOINT_PATH|SUPABASE_ANON_KEY)=' .env \
+            | sed 's/=.*$/=*** (redacted)/' || true
+
+      - name: Run ping script
+        shell: bash
+        run: |
+          chmod +x ./ping_supabase.sh
+          ./ping_supabase.sh
